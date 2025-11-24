@@ -1,7 +1,7 @@
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -44,16 +44,10 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="profile"
           options={{
-            title: 'Explore',
-            tabBarIcon: ({ focused }) => (
-              <IconSymbol
-                size={28}
-                name="paperplane.fill"
-                color={focused ? colors.primary : colors.secondary}
-              />
-            ),
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => <Feather name="user" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
