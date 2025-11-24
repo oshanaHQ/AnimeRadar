@@ -23,6 +23,7 @@ export default function AnimeScreen() {
   const [username, setUsername] = useState('');
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);   // ← ONLY ADDED
 
   // Load logged-in user
   async function loadUser() {
@@ -36,16 +37,26 @@ export default function AnimeScreen() {
   // Pull-to-refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await dispatch(fetchAnime());
+    setPage(1);                          // ← ONLY ADDED
+    await dispatch(fetchAnime(1));       // ← CHANGED: pass page 1
     setRefreshing(false);
   }, [dispatch]);
 
   // Load data on mount
   useEffect(() => {
     loadUser();
-    dispatch(fetchAnime());
+    dispatch(fetchAnime(1));             // ← CHANGED: start from page 1
     dispatch(loadFavourites());
   }, [dispatch]);
+
+  // Load more when reaching end
+  const loadMore = () => {               // ← ONLY ADDED
+    if (!loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      dispatch(fetchAnime(nextPage));
+    }
+  };
 
   // Filter anime by search text
   const filteredAnime = animeList.filter((item) =>
@@ -79,6 +90,8 @@ export default function AnimeScreen() {
         data={filteredAnime}
         keyExtractor={(item) => item.mal_id.toString()}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#00CFFF']} />}
+        onEndReached={loadMore}           // ← ONLY ADDED
+        onEndReachedThreshold={0.5}       // ← ONLY ADDED
         renderItem={({ item }) => {
           const isFav = favourites.some((a) => a.mal_id === item.mal_id);
           return (
@@ -204,7 +217,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   favIconFilled: {
-    color: '#FF6B6B',           // Your beautiful Coral Pink
+    color: '#FF6B6B',
     textShadowColor: 'rgba(255, 107, 107, 0.6)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
