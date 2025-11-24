@@ -3,23 +3,23 @@ import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { useTheme } from '../contexts/ThemeContext'; // ← ONLY ADDED
+import { useTheme } from '../contexts/ThemeContext';
 import { store } from '../store';
 
 export default function RootLayout() {
-  const { theme } = useTheme(); // ← ONLY ADDED
+  const { theme } = useTheme(); 
 
-  // Dynamic colors based on current theme
+ 
   const colors = theme === 'dark'
     ? {
         background: '#1B1F3B',
-        primary: '#00CFFF',      // Active tab (cyan)
-        secondary: '#C4C4C4',    // Inactive tab
+        primary: '#00CFFF',      
+        secondary: '#C4C4C4',   
         text: '#FFF8E7',
       }
     : {
         background: '#FFFFFF',
-        primary: '#00CFFF',      // Keep your brand cyan as primary
+        primary: '#00CFFF',      
         secondary: '#888888',
         text: '#1B1F3B',
       };

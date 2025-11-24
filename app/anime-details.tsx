@@ -27,13 +27,13 @@ export default function AnimeDetailsScreen() {
 
   const isFavourite = favourites.some(a => a.mal_id === animeData.mal_id);
 
-  // Dynamic button styling
+  
   const buttonStyle = {
     backgroundColor: isFavourite
-      ? '#FF6B6B'                         // Red for favourite
+      ? '#FF6B6B'                         
       : theme === 'dark'
-        ? '#00CFFF'                        // Bright blue for dark mode
-        : '#1B1F3B',                       // Dark color for light mode
+        ? '#00CFFF'                        
+        : '#1B1F3B',                       
     shadowColor: isFavourite
       ? '#FF6B6B'
       : theme === 'dark'
@@ -42,10 +42,10 @@ export default function AnimeDetailsScreen() {
   };
 
   const buttonTextColor = isFavourite
-    ? '#1B1F3B'                           // Dark text on red
+    ? '#1B1F3B'                           
     : theme === 'dark'
-      ? '#1B1F3B'                         // Dark text on bright blue
-      : '#FFF8E7';                        // Light text on dark
+      ? '#1B1F3B'                         
+      : '#FFF8E7';                        
 
   return (
     <ScrollView

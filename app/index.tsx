@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // NEW EPIC FINAL SECTION
+  
   finalCta: {
     marginTop: 80,
     alignItems: 'center',

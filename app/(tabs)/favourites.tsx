@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '../contexts/ThemeContext'; // ← ONLY ADDED
+import { useTheme } from '../contexts/ThemeContext';
 import type { AppDispatch, RootState } from '../store';
 import { toggleFavourite } from '../store/animeSlice';
 
@@ -10,7 +10,7 @@ export default function FavouritesScreen() {
   const { favourites } = useSelector((state: RootState) => state.anime);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { theme } = useTheme(); // ← ONLY ADDED
+  const { theme } = useTheme(); 
 
   const colors = theme === 'dark'
     ? { background: '#1B1F3B', text: '#FFF8E7', card: 'rgba(44,47,74,0.7)' }
