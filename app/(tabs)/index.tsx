@@ -55,21 +55,22 @@ export default function AnimeScreen() {
   if (loading && !refreshing) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#00CFFF" />
+        <Text style={styles.loadingText}>Loading top anime...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.userHeader}>Welcome, {username} 👋</Text>
+      <Text style={styles.userHeader}>Welcome, {username}</Text>
       <Text style={styles.header}>Top Anime</Text>
 
       {/* Search Input */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search anime..."
-        placeholderTextColor="#aaa"
+        placeholderTextColor="#888"
         value={search}
         onChangeText={setSearch}
       />
@@ -77,7 +78,7 @@ export default function AnimeScreen() {
       <FlatList
         data={filteredAnime}
         keyExtractor={(item) => item.mal_id.toString()}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#00CFFF']} />}
         renderItem={({ item }) => {
           const isFav = favourites.some((a) => a.mal_id === item.mal_id);
           return (
@@ -90,11 +91,14 @@ export default function AnimeScreen() {
               <Image source={{ uri: item.images.jpg.large_image_url }} style={styles.image} />
               <Text style={styles.title}>{item.title}</Text>
 
+              {/* FIXED & BEAUTIFUL HEART BUTTON */}
               <TouchableOpacity
                 onPress={() => dispatch(toggleFavourite(item))}
-                style={{ position: 'absolute', top: 10, right: 10 }}
+                style={styles.favButton}
               >
-                <Text style={{ fontSize: 24 }}>{isFav ? '❤️' : '🤍'}</Text>
+                <Text style={[styles.favIcon, isFav && styles.favIconFilled]}>
+                  {isFav ? '♥' : '♡'}
+                </Text>
               </TouchableOpacity>
             </TouchableOpacity>
           );
@@ -105,19 +109,104 @@ export default function AnimeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: '#1B1F3B' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  userHeader: { fontSize: 20, fontWeight: '700', color: '#00CFFF', marginBottom: 10 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 15, color: 'white' },
-  searchInput: {
-    height: 40,
-    backgroundColor: '#1E2230',
-    color: 'white',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginBottom: 15,
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#1B1F3B',
+    paddingTop: 60,
   },
-  card: { marginBottom: 15, backgroundColor: '#1E2230', borderRadius: 10, padding: 10 },
-  image: { width: '100%', height: 200, borderRadius: 10, marginBottom: 10 },
-  title: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1B1F3B',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#C4C4C4',
+  },
+  userHeader: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#00CFFF',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFF8E7',
+    marginBottom: 20,
+  },
+  searchInput: {
+    height: 56,
+    backgroundColor: '#2C2F4A',
+    color: '#FFF8E7',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#444',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  card: {
+    marginBottom: 20,
+    backgroundColor: 'rgba(44, 47, 74, 0.7)',
+    borderRadius: 24,
+    overflow: 'hidden',
+    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 207, 255, 0.15)',
+  },
+  image: {
+    width: '100%',
+    height: 240,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  title: {
+    color: '#FFF8E7',
+    fontSize: 18,
+    fontWeight: '800',
+    padding: 16,
+    paddingTop: 12,
+  },
+
+  // BEAUTIFUL & VISIBLE HEART
+  favButton: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  favIcon: {
+    fontSize: 34,
+    color: '#FFFFFF',
+  },
+  favIconFilled: {
+    color: '#FF6B6B',           // Your beautiful Coral Pink
+    textShadowColor: 'rgba(255, 107, 107, 0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
 });
