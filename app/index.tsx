@@ -1,16 +1,15 @@
-// app/index.tsx – AnimeRadar Landing Page (NEW STRUCTURE 2025)
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import {
-    Dimensions,
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 
@@ -28,14 +27,14 @@ export default function Landing() {
           uri: 'https://i.postimg.cc/8P08pYHT/lucid-origin-a-surreal-and-vibrant-cinematic-photo-of-Intense-shonen-anime-style-visual-for-a-0.jpg',
         }}
         style={styles.background}
-        blurRadius={10}
+        blurRadius={0}
       >
         <View style={styles.overlay} />
 
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
           {/* Hero */}
           <Animated.View entering={FadeInUp.duration(1000)}>
-            <Text style={styles.logo}>AnimeRadar</Text>
+            <Text style={styles.logo}> AnimeRadar</Text>
             <Text style={styles.heroTitle}>Your Anime</Text>
             <Text style={styles.heroTitle}>Never Looked Better</Text>
             <Text style={styles.heroSubtitle}>
@@ -43,7 +42,7 @@ export default function Landing() {
             </Text>
           </Animated.View>
 
-          {/* Floating Feature Cards (Glassmorphism) */}
+          {/* Floating Feature Cards */}
           <Animated.View entering={FadeInDown.delay(600).duration(900)} style={styles.featuresGrid}>
             <View style={styles.glassCard}>
               <View style={styles.iconCircle}>
@@ -70,27 +69,32 @@ export default function Landing() {
             </View>
           </Animated.View>
 
-          {/* Call to Action – Glowing Button */}
-          <Animated.View entering={FadeIn.delay(1200).duration(800)} style={styles.ctaSection}>
+          {/* Epic Final CTA */}
+          <Animated.View entering={FadeIn.delay(1200).duration(1000)} style={styles.finalCta}>
+            <Text style={styles.finalTitle}>Ready to Dive In?</Text>
+            <Text style={styles.finalSubtitle}>
+              Join thousands of otakus who found their next obsession
+            </Text>
+
             <TouchableOpacity
-              style={styles.glowButton}
+              style={styles.primaryButton}
               onPress={() => router.push('/login')}
               activeOpacity={0.9}
             >
-              <Text style={styles.glowButtonText}>Start Watching Now</Text>
+              <Text style={styles.primaryButtonText}>Get Started Free</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push('/register')} style={{ marginTop: 20 }}>
-              <Text style={styles.registerText}>Create Free Account →</Text>
+            <TouchableOpacity onPress={() => router.push('/register')} style={{ marginTop: 16 }}>
+              <Text style={styles.secondaryText}>
+                New here? <Text style={{ color: '#FF6B6B', fontWeight: '800' }}>Create Account →</Text>
+              </Text>
             </TouchableOpacity>
           </Animated.View>
 
-          {/* Bottom Badge */}
-          <Animated.View entering={FadeIn.delay(1600).duration(800)}>
-            <View style={styles.premiumBadge}>
-              <Text style={styles.badgeText}>Join 200K+ Anime Lovers</Text>
-            </View>
-          </Animated.View>
+          {/* Final Touch – Minimal Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Made with passion for anime</Text>
+          </View>
 
           <View style={{ height: 100 }} />
         </ScrollView>
@@ -103,7 +107,7 @@ const styles = StyleSheet.create({
   background: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(27, 31, 59, 0.93)',
+    backgroundColor: 'rgba(27, 31, 59, 0.88)',
   },
   container: {
     flexGrow: 1,
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
     color: '#00CFFF',
     letterSpacing: 4,
     textShadowColor: '#00CFFF',
-    textShadowRadius: 30,
+    textShadowRadius: 0,
     marginBottom: 10,
   },
   heroTitle: {
@@ -152,9 +156,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(0, 207, 255, 0.2)',
-    elevation: 10,
+    elevation: 0,
     shadowColor: '#000',
-    shadowOpacity: 0.5,
+    shadowOpacity: 0,
   },
   iconCircle: {
     width: 64,
@@ -178,44 +182,56 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
-  ctaSection: {
-    marginTop: 70,
+
+  // NEW EPIC FINAL SECTION
+  finalCta: {
+    marginTop: 80,
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  glowButton: {
+  finalTitle: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: '#FFF8E7',
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  finalSubtitle: {
+    fontSize: 18,
+    color: '#C4C4C4',
+    textAlign: 'center',
+    marginTop: 12,
+    marginBottom: 32,
+    lineHeight: 26,
+  },
+  primaryButton: {
     backgroundColor: '#00CFFF',
     paddingVertical: 22,
-    paddingHorizontal: 50,
-    borderRadius: 30,
-    elevation: 20,
+    paddingHorizontal: 60,
+    borderRadius: 32,
+    elevation: 0,
     shadowColor: '#00CFFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0,
+    shadowRadius: 25,
   },
-  glowButtonText: {
+  primaryButtonText: {
     color: '#1B1F3B',
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: '900',
+    letterSpacing: 0.5,
   },
-  registerText: {
-    color: '#FF6B6B',
+  secondaryText: {
+    color: '#C4C4C4',
     fontSize: 17,
     fontWeight: '600',
   },
-  premiumBadge: {
-    marginTop: 80,
-    backgroundColor: '#FF6B6B',
-    paddingHorizontal: 40,
-    paddingVertical: 18,
-    borderRadius: 50,
-    elevation: 15,
-    shadowColor: '#FF6B6B',
-    shadowOpacity: 0.7,
+  footer: {
+    marginTop: 60,
   },
-  badgeText: {
-    color: '#FFF8E7',
-    fontSize: 18,
-    fontWeight: '800',
+  footerText: {
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
   },
 });
