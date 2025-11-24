@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '../contexts/ThemeContext'; // ← ONLY ADDED
+import { useTheme } from '../contexts/ThemeContext';
 import type { AppDispatch, RootState } from '../store';
 import { fetchAnime, loadFavourites, toggleFavourite } from '../store/animeSlice';
 
@@ -26,7 +26,7 @@ export default function AnimeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { theme } = useTheme(); // ← ONLY ADDED
+  const { theme } = useTheme();
 
   const colors = theme === 'dark'
     ? { background: '#1B1F3B', text: '#FFF8E7', card: 'rgba(44,47,74,0.7)' }
@@ -43,27 +43,32 @@ export default function AnimeScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     setPage(1);
-    await dispatch(fetchAnime(1));
+    await dispatch(fetchAnime({ page: 1, query: search }));
     setRefreshing(false);
-  }, [dispatch]);
+  }, [dispatch, search]);
 
   useEffect(() => {
     loadUser();
-    dispatch(fetchAnime(1));
+    dispatch(fetchAnime({ page: 1 }));
     dispatch(loadFavourites());
   }, [dispatch]);
+
+  // Debounced search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setPage(1);
+      dispatch(fetchAnime({ page: 1, query: search }));
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [search, dispatch]);
 
   const loadMore = () => {
     if (!loading) {
       const nextPage = page + 1;
       setPage(nextPage);
-      dispatch(fetchAnime(nextPage));
+      dispatch(fetchAnime({ page: nextPage, query: search }));
     }
   };
-
-  const filteredAnime = animeList.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   if (loading && !refreshing) {
     return (
@@ -88,7 +93,7 @@ export default function AnimeScreen() {
       />
 
       <FlatList
-        data={filteredAnime}
+        data={animeList}
         keyExtractor={(item) => item.mal_id.toString()}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#00CFFF']} />}
         onEndReached={loadMore}

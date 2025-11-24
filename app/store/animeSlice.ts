@@ -22,13 +22,15 @@ const initialState: AnimeState = {
   loading: false,
 };
 
-// Updated: Now accepts page number
 export const fetchAnime = createAsyncThunk(
   'anime/fetchAnime',
-  async (page: number = 1) => {
-    const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${page}`);
-    const json = await res.json();
-    return { data: json.data as Anime[], page };
+  async ({ page, query }: { page: number; query?: string }) => {
+    const url = query
+      ? `https://api.jikan.moe/v4/anime?q=${query}&page=${page}`
+      : `https://api.jikan.moe/v4/top/anime?page=${page}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return { data: data.data as Anime[], page };
   }
 );
 
@@ -60,9 +62,9 @@ export const animeSlice = createSlice({
       .addCase(fetchAnime.fulfilled, (state, action) => {
         const { data, page } = action.payload;
         if (page === 1) {
-          state.animeList = data;           // Fresh load → replace
+          state.animeList = data;
         } else {
-          state.animeList = [...state.animeList, ...data];  // Append more
+          state.animeList = [...state.animeList, ...data];
         }
         state.loading = false;
       })
