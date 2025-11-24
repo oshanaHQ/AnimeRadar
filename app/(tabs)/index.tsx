@@ -1,98 +1,142 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from '../contexts/ThemeContext';
+import type { AppDispatch, RootState } from '../store';
+import { fetchAnime, loadFavourites, toggleFavourite } from '../store/animeSlice';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function AnimeScreen() {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { animeList, favourites, loading } = useSelector((state: RootState) => state.anime);
+  const [username, setUsername] = useState('');
+  const [search, setSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
 
-export default function HomeScreen() {
+  const { theme } = useTheme();
+
+  const colors = theme === 'dark'
+    ? { background: '#1B1F3B', text: '#FFF8E7', card: 'rgba(44,47,74,0.7)' }
+    : { background: '#FFF', text: '#1B1F3B', card: '#EDEDED' };
+
+  async function loadUser() {
+    const stored = await AsyncStorage.getItem('user');
+    if (stored) {
+      const user = JSON.parse(stored);
+      setUsername(user.username || user.email);
+    }
+  }
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setPage(1);
+    await dispatch(fetchAnime({ page: 1, query: search }));
+    setRefreshing(false);
+  }, [dispatch, search]);
+
+  useEffect(() => {
+    loadUser();
+    dispatch(fetchAnime({ page: 1 }));
+    dispatch(loadFavourites());
+  }, [dispatch]);
+
+  // Debounced search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setPage(1);
+      dispatch(fetchAnime({ page: 1, query: search }));
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [search, dispatch]);
+
+  const loadMore = () => {
+    if (!loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      dispatch(fetchAnime({ page: nextPage, query: search }));
+    }
+  };
+
+  if (loading && !refreshing) {
+    return (
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color="#00CFFF" />
+        <Text style={[styles.loadingText, { color: colors.text }]}>Loading top anime...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.userHeader, { color: '#00CFFF' }]}>Welcome, {username}</Text>
+      <Text style={[styles.header, { color: colors.text }]}>Top Anime</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <TextInput
+        style={[styles.searchInput, { backgroundColor: theme === 'dark' ? '#2C2F4A' : '#F0F0F0', color: colors.text }]}
+        placeholder="Search anime..."
+        placeholderTextColor="#888"
+        value={search}
+        onChangeText={setSearch}
+      />
+
+      <FlatList
+        data={animeList}
+        keyExtractor={(item) => item.mal_id.toString()}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#00CFFF']} />}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        renderItem={({ item }) => {
+          const isFav = favourites.some((a) => a.mal_id === item.mal_id);
+          return (
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: colors.card }]}
+              onPress={() =>
+                router.push({ pathname: '/anime-details' as any, params: { anime: JSON.stringify(item) } })
+              }
+            >
+              <Image source={{ uri: item.images.jpg.large_image_url }} style={styles.image} />
+              <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
+
+              <TouchableOpacity
+                onPress={() => dispatch(toggleFavourite(item))}
+                style={styles.favButton}
+              >
+                <Text style={[styles.favIcon, isFav && styles.favIconFilled]}>
+                  {isFav ? '♥' : '♡'}
+                </Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, padding: 20, paddingTop: 60 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 16, fontSize: 16 },
+  userHeader: { fontSize: 24, fontWeight: '900', marginBottom: 8, letterSpacing: 0.5 },
+  header: { fontSize: 28, fontWeight: '900', marginBottom: 20 },
+  searchInput: { height: 56, borderRadius: 20, paddingHorizontal: 20, fontSize: 16, marginBottom: 20, borderWidth: 1, borderColor: '#444' },
+  card: { marginBottom: 20, borderRadius: 24, overflow: 'hidden', elevation: 12, borderWidth: 1, borderColor: 'rgba(0, 207, 255, 0.15)' },
+  image: { width: '100%', height: 240, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  title: { fontSize: 18, fontWeight: '800', padding: 16, paddingTop: 12 },
+  favButton: { position: 'absolute', top: 14, right: 14, backgroundColor: 'rgba(0, 0, 0, 0.65)', width: 52, height: 52, borderRadius: 26, justifyContent: 'center', alignItems: 'center', elevation: 10, borderWidth: 2, borderColor: 'rgba(255, 107, 107, 0.3)' },
+  favIcon: { fontSize: 34, color: '#FFFFFF' },
+  favIconFilled: { color: '#FF6B6B' },
 });

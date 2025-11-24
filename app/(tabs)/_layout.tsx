@@ -1,35 +1,73 @@
+import { HapticTab } from '@/components/haptic-tab';
+import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Provider } from 'react-redux';
+import { useTheme } from '../contexts/ThemeContext';
+import { store } from '../store';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+export default function RootLayout() {
+  const { theme } = useTheme(); 
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+ 
+  const colors = theme === 'dark'
+    ? {
+        background: '#1B1F3B',
+        primary: '#00CFFF',      
+        secondary: '#C4C4C4',   
+        text: '#FFF8E7',
+      }
+    : {
+        background: '#FFFFFF',
+        primary: '#00CFFF',      
+        secondary: '#888888',
+        text: '#1B1F3B',
+      };
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <Provider store={store}>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.secondary,
+          tabBarStyle: { backgroundColor: colors.background },
+          headerShown: false,
+          tabBarButton: HapticTab,
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        {/* HOME TAB */}
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="home" size={size} color={color} />
+            ),
+          }}
+        />
+
+        {/* PROFILE TAB */}
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="user" size={size} color={color} />
+            ),
+          }}
+        />
+
+        {/* FAVOURITES TAB */}
+        <Tabs.Screen
+          name="favourites"
+          options={{
+            title: 'Favourites',
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="heart" size={size} color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+    </Provider>
   );
 }
