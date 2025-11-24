@@ -2,13 +2,15 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext'; // ← Only this import added
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState({ username: '', email: '', password: '' });
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();  // ← Only this line added
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadUser();
@@ -16,7 +18,52 @@ export default function ProfileScreen() {
 
   async function loadUser() {
     const stored = await AsyncStorage.getItem('user');
-    if (stored) setUser(JSON.parse(stored));
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setUser(parsed);
+      setEditedUser({
+        username: parsed.username || parsed.email.split('@')[0],
+        email: parsed.email,
+        password: '',
+      });
+    }
+  }
+
+  async function saveProfile() {
+    if (!editedUser.username.trim() || !editedUser.email.trim()) {
+      Alert.alert('Error', 'Username and email are required');
+      return;
+    }
+
+    try {
+      const updatedUser = {
+        ...user,
+        username: editedUser.username.trim(),
+        email: editedUser.email.trim(),
+        ...(editedUser.password ? { password: editedUser.password } : {}),
+      };
+
+      // Update logged-in user
+      await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      // Update in registered users list
+      const usersJson = await AsyncStorage.getItem('users');
+      if (usersJson) {
+        const users = JSON.parse(usersJson);
+        const updatedUsers = users.map((u: any) =>
+          u.email === user.email
+            ? { ...u, username: updatedUser.username, email: updatedUser.email, ...(editedUser.password ? { password: editedUser.password } : {}) }
+            : u
+        );
+        await AsyncStorage.setItem('users', JSON.stringify(updatedUsers));
+      }
+
+      setIsEditing(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to save profile');
+    }
   }
 
   async function logout() {
@@ -26,7 +73,6 @@ export default function ProfileScreen() {
 
   if (!user) return null;
 
-  // Dynamic colors based on current theme
   const colors = theme === 'dark'
     ? {
         background: '#1B1F3B',
@@ -37,6 +83,8 @@ export default function ProfileScreen() {
         favBg: 'rgba(255, 107, 107, 0.12)',
         favBorder: 'rgba(255, 107, 107, 0.3)',
         favColor: '#FF6B6B',
+        inputBg: '#2C2F4A',
+        placeholder: '#888',
       }
     : {
         background: '#FFFFFF',
@@ -47,6 +95,8 @@ export default function ProfileScreen() {
         favBg: '#FFF5F5',
         favBorder: '#FF6B6B',
         favColor: '#FF6B6B',
+        inputBg: '#F0F0F0',
+        placeholder: '#666',
       };
 
   return (
@@ -60,13 +110,61 @@ export default function ProfileScreen() {
           <Feather name="user" size={56} color={colors.accent} />
         </View>
 
-        <Text style={[styles.username, { color: colors.accent }]}>
-          {user.username || user.email.split('@')[0]}
-        </Text>
-        <Text style={[styles.email, { color: theme === 'dark' ? '#C4C4C4' : '#666' }]}>
-          {user.email}
-        </Text>
+        {isEditing ? (
+          <>
+            <TextInput
+              style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.text }]}
+              value={editedUser.username}
+              onChangeText={(text) => setEditedUser({ ...editedUser, username: text })}
+              placeholder="Username"
+              placeholderTextColor={colors.placeholder}
+            />
+            <TextInput
+              style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.text, marginTop: 12 }]}
+              value={editedUser.email}
+              onChangeText={(text) => setEditedUser({ ...editedUser, email: text })}
+              placeholder="Email"
+              placeholderTextColor={colors.placeholder}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.text, marginTop: 12 }]}
+              value={editedUser.password}
+              onChangeText={(text) => setEditedUser({ ...editedUser, password: text })}
+              placeholder="New Password (optional)"
+              placeholderTextColor={colors.placeholder}
+              secureTextEntry
+            />
+          </>
+        ) : (
+          <>
+            <Text style={[styles.username, { color: colors.accent }]}>
+              {user.username || user.email.split('@')[0]}
+            </Text>
+            <Text style={[styles.email, { color: theme === 'dark' ? '#C4C4C4' : '#666' }]}>
+              {user.email}
+            </Text>
+          </>
+        )}
       </View>
+
+      {/* Edit / Save Button */}
+      <TouchableOpacity
+        style={[styles.editBtn, { backgroundColor: colors.accent }]}
+        onPress={() => (isEditing ? saveProfile() : setIsEditing(true))}
+      >
+        <Feather name={isEditing ? 'check' : 'edit-2'} size={24} color="#FFF" />
+        <Text style={styles.editBtnText}>
+          {isEditing ? 'Save Changes' : 'Edit Profile'}
+        </Text>
+      </TouchableOpacity>
+
+      {isEditing && (
+        <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsEditing(false)}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
+      )}
 
       {/* My Favourites Button */}
       <TouchableOpacity
@@ -82,10 +180,7 @@ export default function ProfileScreen() {
       </TouchableOpacity>
 
       {/* Theme Toggle Button */}
-      <TouchableOpacity
-        style={styles.themeToggleBtn}
-        onPress={toggleTheme}
-      >
+      <TouchableOpacity style={styles.themeToggleBtn} onPress={toggleTheme}>
         <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={24} color="#FFF" />
         <Text style={styles.themeToggleText}>
           {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -144,6 +239,43 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 16,
     marginTop: 8,
+    fontWeight: '600',
+  },
+  editInput: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 16,
+    fontSize: 17,
+    textAlign: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 207, 255, 0.3)',
+  },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#00CFFF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  editBtnText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
+    marginLeft: 12,
+  },
+  cancelBtn: {
+    padding: 12,
+    marginBottom: 20,
+  },
+  cancelText: {
+    color: '#888',
+    fontSize: 16,
     fontWeight: '600',
   },
   favouritesBtn: {
