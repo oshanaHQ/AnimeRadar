@@ -41,7 +41,7 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+      <Text style={styles.title}>Create Account</Text>
 
       <Controller
         control={control}
@@ -50,6 +50,7 @@ export default function Register() {
           <TextInput
             style={styles.input}
             placeholder="Username"
+            placeholderTextColor="#C4C4C4"
             value={value}
             onChangeText={onChange}
           />
@@ -64,8 +65,10 @@ export default function Register() {
           <TextInput
             style={styles.input}
             placeholder="Email"
+            placeholderTextColor="#C4C4C4"
             value={value}
             onChangeText={onChange}
+            autoCapitalize="none"
           />
         )}
       />
@@ -78,6 +81,7 @@ export default function Register() {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#C4C4C4"
             secureTextEntry
             value={value}
             onChangeText={onChange}
@@ -91,17 +95,68 @@ export default function Register() {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push('/login')}>
-        <Text style={{ marginTop: 20, color: '#00CFFF' }}>Already have an account? Login</Text>
+        <Text style={styles.linkText}>Already have an account? Login</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#1B1F3B' },
-  title: { fontSize: 32, fontWeight: '900', color: '#00CFFF', marginBottom: 40 },
-  input: { width: '100%', padding: 15, borderRadius: 10, backgroundColor: '#2C2F4A', color: '#FFF', marginBottom: 10 },
-  button: { backgroundColor: '#00CFFF', padding: 15, borderRadius: 10, marginTop: 10, width: '100%', alignItems: 'center' },
-  buttonText: { color: '#1B1F3B', fontWeight: '900', fontSize: 18 },
-  error: { color: '#FF6B6B', alignSelf: 'flex-start', marginBottom: 5 }
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#1B1F3B',
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: '#00CFFF',
+    marginBottom: 50,
+    letterSpacing: 1,
+  },
+  input: {
+    width: '100%',
+    padding: 18,
+    borderRadius: 16,
+    backgroundColor: '#2C2F4A',
+    color: '#FFF8E7',
+    fontSize: 16,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 207, 255, 0.2)',
+  },
+  button: {
+    backgroundColor: '#00CFFF',
+    paddingVertical: 18,
+    borderRadius: 16,
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#00CFFF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  buttonText: {
+    color: '#1B1F3B',
+    fontWeight: '900',
+    fontSize: 18,
+    letterSpacing: 0.5,
+  },
+  error: {
+    color: '#FF6B6B',
+    alignSelf: 'flex-start',
+    marginLeft: 8,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  linkText: {
+    marginTop: 24,
+    color: '#00CFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });
