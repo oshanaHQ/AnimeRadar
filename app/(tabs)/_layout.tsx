@@ -1,22 +1,28 @@
 import { HapticTab } from '@/components/haptic-tab';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { useTheme } from '../contexts/ThemeContext'; // ← ONLY ADDED
 import { store } from '../store';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme(); // ← ONLY ADDED
 
-  // Color palette
-  const colors = {
-    background: '#1B1F3B',
-    primary: '#00CFFF',
-    accent: '#FF6B6B',
-    text: '#FFF8E7',
-    secondary: '#C4C4C4',
-  };
+  // Dynamic colors based on current theme
+  const colors = theme === 'dark'
+    ? {
+        background: '#1B1F3B',
+        primary: '#00CFFF',      // Active tab (cyan)
+        secondary: '#C4C4C4',    // Inactive tab
+        text: '#FFF8E7',
+      }
+    : {
+        background: '#FFFFFF',
+        primary: '#00CFFF',      // Keep your brand cyan as primary
+        secondary: '#888888',
+        text: '#1B1F3B',
+      };
 
   return (
     <Provider store={store}>
@@ -24,12 +30,11 @@ export default function RootLayout() {
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.secondary,
+          tabBarStyle: { backgroundColor: colors.background },
           headerShown: false,
           tabBarButton: HapticTab,
-          tabBarStyle: { backgroundColor: colors.background },
         }}
       >
-
         {/* HOME TAB */}
         <Tabs.Screen
           name="index"
@@ -62,7 +67,6 @@ export default function RootLayout() {
             ),
           }}
         />
-
       </Tabs>
     </Provider>
   );
