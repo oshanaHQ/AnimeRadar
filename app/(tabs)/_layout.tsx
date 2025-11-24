@@ -34,10 +34,17 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="favourites"
+          options={{
+            title: 'Favourites',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="anime-details"
           options={{
             title: 'Anime Details',
-            tabBarButton: () => null, // hide from tab bar
+            tabBarButton: () => null, // hidden from tab bar
           }}
         />
       </Tabs>
