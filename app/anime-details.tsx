@@ -2,9 +2,9 @@ import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useTheme } from '../contexts/ThemeContext';
-import type { AppDispatch, RootState } from "../store";
-import { toggleFavourite } from "../store/animeSlice";
+import { useTheme } from './contexts/ThemeContext';
+import type { AppDispatch, RootState } from "./store";
+import { toggleFavourite } from "./store/animeSlice";
 
 export default function AnimeDetailsScreen() {
   const { anime } = useLocalSearchParams<{ anime: string }>();
