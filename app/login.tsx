@@ -31,8 +31,12 @@ export default function Login() {
         return;
       }
 
+      // ✅ Save logged-in user so app can show username
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+
       Alert.alert('Login Successful', `Welcome ${user.username}`);
-      router.push('/(tabs)'); // Navigate to main tabs after login
+
+      router.push('/(tabs)'); // go to tabs
     } catch (err) {
       Alert.alert('Error', 'Something went wrong');
     }
@@ -76,7 +80,9 @@ export default function Login() {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push('/register')}>
-        <Text style={{ marginTop: 20, color: '#00CFFF' }}>Don't have an account? Register</Text>
+        <Text style={{ marginTop: 20, color: '#00CFFF' }}>
+          Don't have an account? Register
+        </Text>
       </TouchableOpacity>
     </View>
   );
