@@ -3,7 +3,7 @@ import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../store';
-import { removeFavourite } from '../store/animeSlice';
+import { toggleFavourite } from '../store/animeSlice';
 
 export default function FavouritesScreen() {
   const { favourites } = useSelector((state: RootState) => state.anime);
@@ -30,8 +30,9 @@ export default function FavouritesScreen() {
         >
           <Image source={{ uri: item.images.jpg.large_image_url }} style={styles.image} />
           <Text style={styles.title}>{item.title}</Text>
+
           <TouchableOpacity
-            onPress={() => dispatch(removeFavourite(item.mal_id))}
+            onPress={() => dispatch(toggleFavourite(item))}
             style={{ position: 'absolute', top: 10, right: 10 }}
           >
             <Text style={{ fontSize: 24 }}>❤️</Text>

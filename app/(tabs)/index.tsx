@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../store';
-import { addFavourite, fetchAnime, removeFavourite } from '../store/animeSlice';
+import { fetchAnime, loadFavourites, toggleFavourite } from '../store/animeSlice';
 
 export default function AnimeScreen() {
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function AnimeScreen() {
   useEffect(() => {
     loadUser();
     dispatch(fetchAnime());
+    dispatch(loadFavourites()); // load saved favourites on app start
   }, []);
 
   if (loading) {
@@ -32,12 +33,6 @@ export default function AnimeScreen() {
       </View>
     );
   }
-
-  const toggleFavourite = (anime: typeof animeList[0]) => {
-    const exists = favourites.find(a => a.mal_id === anime.mal_id);
-    if (exists) dispatch(removeFavourite(anime.mal_id));
-    else dispatch(addFavourite(anime));
-  };
 
   return (
     <View style={styles.container}>
@@ -56,8 +51,9 @@ export default function AnimeScreen() {
             >
               <Image source={{ uri: item.images.jpg.large_image_url }} style={styles.image} />
               <Text style={styles.title}>{item.title}</Text>
+
               <TouchableOpacity
-                onPress={() => toggleFavourite(item)}
+                onPress={() => dispatch(toggleFavourite(item))}
                 style={{ position: 'absolute', top: 10, right: 10 }}
               >
                 <Text style={{ fontSize: 24 }}>{isFav ? '❤️' : '🤍'}</Text>

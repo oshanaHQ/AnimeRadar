@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type Anime = {
@@ -26,16 +27,26 @@ export const fetchAnime = createAsyncThunk('anime/fetchAnime', async () => {
   return json.data as Anime[];
 });
 
+// Async thunk to load favourites from AsyncStorage
+export const loadFavourites = createAsyncThunk('anime/loadFavourites', async () => {
+  const stored = await AsyncStorage.getItem('favourites');
+  if (stored) return JSON.parse(stored) as Anime[];
+  return [];
+});
+
 export const animeSlice = createSlice({
   name: 'anime',
   initialState,
   reducers: {
-    addFavourite: (state, action: PayloadAction<Anime>) => {
+    toggleFavourite: (state, action: PayloadAction<Anime>) => {
       const exists = state.favourites.find(a => a.mal_id === action.payload.mal_id);
-      if (!exists) state.favourites.push(action.payload);
-    },
-    removeFavourite: (state, action: PayloadAction<number>) => {
-      state.favourites = state.favourites.filter(a => a.mal_id !== action.payload);
+      if (exists) {
+        state.favourites = state.favourites.filter(a => a.mal_id !== action.payload.mal_id);
+      } else {
+        state.favourites.push(action.payload);
+      }
+      // Save updated favourites to AsyncStorage
+      AsyncStorage.setItem('favourites', JSON.stringify(state.favourites));
     },
   },
   extraReducers: (builder) => {
@@ -45,10 +56,12 @@ export const animeSlice = createSlice({
         state.animeList = action.payload;
         state.loading = false;
       })
-      .addCase(fetchAnime.rejected, (state) => { state.loading = false; });
+      .addCase(fetchAnime.rejected, (state) => { state.loading = false; })
+      .addCase(loadFavourites.fulfilled, (state, action: PayloadAction<Anime[]>) => {
+        state.favourites = action.payload;
+      });
   },
 });
 
-export const { addFavourite, removeFavourite } = animeSlice.actions;
-
+export const { toggleFavourite } = animeSlice.actions;
 export default animeSlice.reducer;

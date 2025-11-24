@@ -1,10 +1,15 @@
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../store";
+import { toggleFavourite } from "../store/animeSlice"; // create this in your slice
 
 export default function AnimeDetailsScreen() {
   const { anime } = useLocalSearchParams<{ anime: string }>();
   const animeData = anime ? JSON.parse(anime) : null;
+  const dispatch = useDispatch<AppDispatch>();
+  const favourites = useSelector((state: RootState) => state.anime.favourites);
 
   if (!animeData) {
     return (
@@ -13,6 +18,8 @@ export default function AnimeDetailsScreen() {
       </View>
     );
   }
+
+  const isFavourite = favourites.some(a => a.mal_id === animeData.mal_id);
 
   return (
     <ScrollView style={styles.container}>
@@ -24,6 +31,15 @@ export default function AnimeDetailsScreen() {
       <Text style={styles.synopsis}>
         {animeData.synopsis || "No synopsis available"}
       </Text>
+
+      <TouchableOpacity
+        style={[styles.button, isFavourite ? styles.buttonActive : {}]}
+        onPress={() => dispatch(toggleFavourite(animeData))}
+      >
+        <Text style={styles.buttonText}>
+          {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -33,5 +49,15 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   image: { width: "100%", height: 300, borderRadius: 10, marginBottom: 15 },
   title: { fontSize: 24, fontWeight: "bold", color: "#00CFFF", marginBottom: 10 },
-  synopsis: { fontSize: 16, color: "white" },
+  synopsis: { fontSize: 16, color: "white", marginBottom: 20 },
+  button: {
+    padding: 12,
+    backgroundColor: "#00CFFF",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonActive: {
+    backgroundColor: "#FF6B6B",
+  },
+  buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
 });
